@@ -1,208 +1,219 @@
 import { useMemo, useState } from 'react'
 
-const focusTracks = [
-  {
-    title: 'Components',
-    note: 'Break the interface into smaller reusable pieces.',
-  },
-  {
-    title: 'Hooks',
-    note: 'Use state and derived values to keep the UI reactive.',
-  },
-  {
-    title: 'Styling',
-    note: 'Practice layout, spacing, and polished visual hierarchy.',
-  },
+const starterStops = [
+  { id: 1, city: 'New York', type: 'Arrival', budget: 120, booked: true },
+  { id: 2, city: 'Boston', type: 'Food', budget: 75, booked: false },
+  { id: 3, city: 'Chicago', type: 'Stay', budget: 210, booked: true },
 ]
 
-const starterSessions = [
-  { id: 1, name: 'Build a reusable card component', minutes: 35, done: true },
-  { id: 2, name: 'Practice form handling with useState', minutes: 25, done: true },
-  { id: 3, name: 'Create a dynamic list with map()', minutes: 30, done: false },
+const inspirationCards = [
+  {
+    title: 'Interactive Forms',
+    detail: 'Add and manage trip stops with controlled inputs.',
+  },
+  {
+    title: 'Derived Totals',
+    detail: 'Calculate budget, bookings, and progress from state.',
+  },
+  {
+    title: 'Responsive UI',
+    detail: 'Use layout cards and mobile-friendly sections.',
+  },
 ]
 
 function App() {
-  const [studentName, setStudentName] = useState('Kabita')
-  const [goal, setGoal] = useState('Finish two more mini React projects this week.')
-  const [sessions, setSessions] = useState(starterSessions)
-  const [sessionName, setSessionName] = useState('')
-  const [minutes, setMinutes] = useState(20)
-  const [selectedView, setSelectedView] = useState('Today')
+  const [traveler, setTraveler] = useState('Kabita')
+  const [destination, setDestination] = useState('Spring React Road Trip')
+  const [stops, setStops] = useState(starterStops)
+  const [city, setCity] = useState('')
+  const [type, setType] = useState('Stay')
+  const [budget, setBudget] = useState(100)
+  const [note, setNote] = useState('Practice more reusable React components on the next page.')
 
-  const totalMinutes = useMemo(
-    () => sessions.reduce((sum, session) => sum + session.minutes, 0),
-    [sessions],
+  const totalBudget = useMemo(
+    () => stops.reduce((sum, stop) => sum + stop.budget, 0),
+    [stops],
   )
 
-  const completedSessions = useMemo(
-    () => sessions.filter((session) => session.done).length,
-    [sessions],
+  const bookedCount = useMemo(
+    () => stops.filter((stop) => stop.booked).length,
+    [stops],
   )
 
-  const progressPercent = useMemo(() => {
-    if (sessions.length === 0) {
+  const bookingRate = useMemo(() => {
+    if (stops.length === 0) {
       return 0
     }
 
-    return Math.round((completedSessions / sessions.length) * 100)
-  }, [completedSessions, sessions.length])
+    return Math.round((bookedCount / stops.length) * 100)
+  }, [bookedCount, stops.length])
 
-  const longestSession = useMemo(() => {
-    if (sessions.length === 0) {
-      return 0
+  const nextBudgetLabel = useMemo(() => {
+    if (budget >= 200) {
+      return 'Big spend'
     }
 
-    return Math.max(...sessions.map((session) => session.minutes))
-  }, [sessions])
+    if (budget >= 120) {
+      return 'Balanced'
+    }
 
-  function handleAddSession(event) {
+    return 'Budget friendly'
+  }, [budget])
+
+  function handleAddStop(event) {
     event.preventDefault()
 
-    const trimmedName = sessionName.trim()
-    if (!trimmedName) {
+    const trimmedCity = city.trim()
+    if (!trimmedCity) {
       return
     }
 
-    setSessions((currentSessions) => [
+    setStops((currentStops) => [
       {
         id: crypto.randomUUID(),
-        name: trimmedName,
-        minutes,
-        done: false,
+        city: trimmedCity,
+        type,
+        budget,
+        booked: false,
       },
-      ...currentSessions,
+      ...currentStops,
     ])
-    setSessionName('')
-    setMinutes(20)
+    setCity('')
+    setType('Stay')
+    setBudget(100)
   }
 
-  function handleToggleSession(sessionId) {
-    setSessions((currentSessions) =>
-      currentSessions.map((session) =>
-        session.id === sessionId
-          ? { ...session, done: !session.done }
-          : session,
+  function handleToggleBooked(stopId) {
+    setStops((currentStops) =>
+      currentStops.map((stop) =>
+        stop.id === stopId ? { ...stop, booked: !stop.booked } : stop,
       ),
     )
   }
 
   return (
-    <main className="study-board">
-      <section className="hero-layout">
-        <article className="hero-main">
-          <p className="eyebrow">React Study Planner</p>
-          <h1>Another React practice project for today.</h1>
+    <main className="trip-shell">
+      <section className="hero-grid">
+        <article className="hero-panel">
+          <p className="eyebrow">React Trip Planner</p>
+          <h1>Another fresh React project idea.</h1>
           <p className="hero-copy">
-            This version is built like a study dashboard with forms, derived
-            statistics, toggles, and a cleaner multi-column layout.
+            This version feels like a mini travel dashboard with budget
+            planning, trip stops, booking progress, and editable notes.
           </p>
 
-          <div className="view-switcher" aria-label="Dashboard views">
-            {['Today', 'This Week', 'Next'].map((view) => (
-              <button
-                key={view}
-                type="button"
-                className={selectedView === view ? 'switch active' : 'switch'}
-                onClick={() => setSelectedView(view)}
-              >
-                {view}
-              </button>
-            ))}
+          <div className="hero-stats">
+            <div className="stat-chip">
+              <span className="stat-value">{totalBudget}</span>
+              <span className="stat-label">total budget</span>
+            </div>
+            <div className="stat-chip">
+              <span className="stat-value">{bookingRate}%</span>
+              <span className="stat-label">booked</span>
+            </div>
           </div>
         </article>
 
-        <aside className="hero-side">
-          <p className="mini-label">Profile</p>
-          <label className="field-label" htmlFor="studentName">
-            Learner name
+        <aside className="profile-panel">
+          <p className="mini-label">Planner Info</p>
+
+          <label className="field-label" htmlFor="traveler">
+            Traveler
           </label>
           <input
-            id="studentName"
+            id="traveler"
             className="text-input"
-            value={studentName}
-            onChange={(event) => setStudentName(event.target.value)}
+            value={traveler}
+            onChange={(event) => setTraveler(event.target.value)}
           />
 
-          <label className="field-label" htmlFor="goal">
-            Current goal
+          <label className="field-label" htmlFor="destination">
+            Trip title
           </label>
-          <textarea
-            id="goal"
-            className="text-area"
-            value={goal}
-            onChange={(event) => setGoal(event.target.value)}
-            rows="4"
+          <input
+            id="destination"
+            className="text-input"
+            value={destination}
+            onChange={(event) => setDestination(event.target.value)}
           />
         </aside>
       </section>
 
-      <section className="metrics-grid">
-        <article className="metric-card">
-          <p className="mini-label">Progress</p>
-          <h2>{progressPercent}% complete</h2>
-          <p>{completedSessions} sessions finished so far.</p>
-        </article>
-
-        <article className="metric-card">
-          <p className="mini-label">Time Spent</p>
-          <h2>{totalMinutes} mins</h2>
-          <p>Total planned time across your React practice sessions.</p>
-        </article>
-
-        <article className="metric-card">
-          <p className="mini-label">Best Focus Block</p>
-          <h2>{longestSession} mins</h2>
-          <p>Your longest deep-work session in this practice board.</p>
-        </article>
+      <section className="inspiration-grid">
+        {inspirationCards.map((card) => (
+          <article key={card.title} className="info-card">
+            <p className="mini-label">Practice Focus</p>
+            <h2>{card.title}</h2>
+            <p>{card.detail}</p>
+          </article>
+        ))}
       </section>
 
       <section className="content-grid">
         <article className="panel">
           <div className="panel-header">
             <div>
-              <p className="mini-label">Session Planner</p>
-              <h2>{studentName}&apos;s React tasks</h2>
+              <p className="mini-label">Trip Builder</p>
+              <h2>{destination}</h2>
             </div>
-            <span className="badge">{selectedView}</span>
+            <span className="badge">{traveler}</span>
           </div>
 
-          <form className="planner-form" onSubmit={handleAddSession}>
+          <form className="planner-form" onSubmit={handleAddStop}>
             <input
               className="text-input"
-              value={sessionName}
-              onChange={(event) => setSessionName(event.target.value)}
-              placeholder="Add a React study task"
+              value={city}
+              onChange={(event) => setCity(event.target.value)}
+              placeholder="Add a city or stop"
             />
 
-            <div className="form-row">
-              <label className="slider-wrap">
-                <span>Minutes: {minutes}</span>
+            <div className="row-layout">
+              <label className="field-group">
+                <span>Category</span>
+                <select
+                  className="select-input"
+                  value={type}
+                  onChange={(event) => setType(event.target.value)}
+                >
+                  <option value="Stay">Stay</option>
+                  <option value="Food">Food</option>
+                  <option value="Arrival">Arrival</option>
+                  <option value="Activity">Activity</option>
+                </select>
+              </label>
+
+              <label className="field-group">
+                <span>Budget: ${budget}</span>
                 <input
                   className="range-input"
                   type="range"
-                  min="10"
-                  max="90"
-                  step="5"
-                  value={minutes}
-                  onChange={(event) => setMinutes(Number(event.target.value))}
+                  min="20"
+                  max="300"
+                  step="10"
+                  value={budget}
+                  onChange={(event) => setBudget(Number(event.target.value))}
                 />
               </label>
-              <button type="submit">Create session</button>
+
+              <button type="submit">Add stop</button>
             </div>
           </form>
 
-          <ul className="session-list">
-            {sessions.map((session) => (
-              <li key={session.id} className="session-card">
-                <label className="session-check">
+          <ul className="stop-list">
+            {stops.map((stop) => (
+              <li key={stop.id} className="stop-card">
+                <label className="stop-row">
                   <input
                     type="checkbox"
-                    checked={session.done}
-                    onChange={() => handleToggleSession(session.id)}
+                    checked={stop.booked}
+                    onChange={() => handleToggleBooked(stop.id)}
                   />
-                  <div>
-                    <strong>{session.name}</strong>
-                    <p>{session.minutes} minute focus block</p>
+
+                  <div className="stop-copy">
+                    <strong>{stop.city}</strong>
+                    <p>
+                      {stop.type} · ${stop.budget}
+                    </p>
                   </div>
                 </label>
               </li>
@@ -213,25 +224,34 @@ function App() {
         <article className="panel accent-panel">
           <div className="panel-header">
             <div>
-              <p className="mini-label">Learning Tracks</p>
-              <h2>What this app practices</h2>
+              <p className="mini-label">Trip Summary</p>
+              <h2>Quick overview</h2>
             </div>
-            <span className="badge soft-badge">React UI</span>
+            <span className="badge warm-badge">{nextBudgetLabel}</span>
           </div>
 
-          <div className="track-list">
-            {focusTracks.map((track) => (
-              <article key={track.title} className="track-card">
-                <h3>{track.title}</h3>
-                <p>{track.note}</p>
-              </article>
-            ))}
+          <div className="summary-stack">
+            <article className="summary-card">
+              <span className="summary-number">{stops.length}</span>
+              <p>Total planned stops</p>
+            </article>
+
+            <article className="summary-card">
+              <span className="summary-number">{bookedCount}</span>
+              <p>Stops already booked</p>
+            </article>
           </div>
 
-          <div className="goal-card">
-            <p className="mini-label">Current note</p>
-            <p>{goal}</p>
-          </div>
+          <label className="field-label" htmlFor="note">
+            Planner note
+          </label>
+          <textarea
+            id="note"
+            className="text-area"
+            rows="5"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+          />
         </article>
       </section>
     </main>
