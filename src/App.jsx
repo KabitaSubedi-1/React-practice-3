@@ -1,192 +1,209 @@
 import { useMemo, useState } from 'react'
 
-const conceptCards = [
+const focusTracks = [
   {
-    title: 'State Management',
-    description: 'Used useState to keep forms, counters, and UI feedback in sync.',
+    title: 'Components',
+    note: 'Break the interface into smaller reusable pieces.',
   },
   {
-    title: 'Derived Data',
-    description: 'Calculated totals and completion progress from live task data.',
+    title: 'Hooks',
+    note: 'Use state and derived values to keep the UI reactive.',
   },
   {
-    title: 'Event Handling',
-    description: 'Practiced button clicks, form submit flows, and controlled inputs.',
+    title: 'Styling',
+    note: 'Practice layout, spacing, and polished visual hierarchy.',
   },
 ]
 
-const initialPracticeItems = [
-  { id: 1, text: 'Built a counter with increase and reset buttons', done: true },
-  { id: 2, text: 'Practiced controlled inputs in a form', done: true },
-  { id: 3, text: 'Rendered task cards using map()', done: true },
-  { id: 4, text: 'Added one more custom React challenge', done: false },
-]
-
-const initialWins = [
-  'I feel more confident with component structure.',
-  'I can connect state to the UI much faster now.',
+const starterSessions = [
+  { id: 1, name: 'Build a reusable card component', minutes: 35, done: true },
+  { id: 2, name: 'Practice form handling with useState', minutes: 25, done: true },
+  { id: 3, name: 'Create a dynamic list with map()', minutes: 30, done: false },
 ]
 
 function App() {
-  const [name, setName] = useState('Kabita')
-  const [streak, setStreak] = useState(6)
-  const [energy, setEnergy] = useState(8)
-  const [practiceItems, setPracticeItems] = useState(initialPracticeItems)
-  const [newTask, setNewTask] = useState('')
-  const [wins, setWins] = useState(initialWins)
-  const [winInput, setWinInput] = useState('')
+  const [studentName, setStudentName] = useState('Kabita')
+  const [goal, setGoal] = useState('Finish two more mini React projects this week.')
+  const [sessions, setSessions] = useState(starterSessions)
+  const [sessionName, setSessionName] = useState('')
+  const [minutes, setMinutes] = useState(20)
+  const [selectedView, setSelectedView] = useState('Today')
 
-  const completedCount = useMemo(
-    () => practiceItems.filter((item) => item.done).length,
-    [practiceItems],
+  const totalMinutes = useMemo(
+    () => sessions.reduce((sum, session) => sum + session.minutes, 0),
+    [sessions],
   )
 
-  const completionRate = useMemo(() => {
-    if (practiceItems.length === 0) {
+  const completedSessions = useMemo(
+    () => sessions.filter((session) => session.done).length,
+    [sessions],
+  )
+
+  const progressPercent = useMemo(() => {
+    if (sessions.length === 0) {
       return 0
     }
 
-    return Math.round((completedCount / practiceItems.length) * 100)
-  }, [completedCount, practiceItems.length])
+    return Math.round((completedSessions / sessions.length) * 100)
+  }, [completedSessions, sessions.length])
 
-  const moodLabel = useMemo(() => {
-    if (energy >= 9) {
-      return 'On fire'
+  const longestSession = useMemo(() => {
+    if (sessions.length === 0) {
+      return 0
     }
 
-    if (energy >= 7) {
-      return 'Locked in'
+    return Math.max(...sessions.map((session) => session.minutes))
+  }, [sessions])
+
+  function handleAddSession(event) {
+    event.preventDefault()
+
+    const trimmedName = sessionName.trim()
+    if (!trimmedName) {
+      return
     }
 
-    if (energy >= 5) {
-      return 'Steady'
-    }
+    setSessions((currentSessions) => [
+      {
+        id: crypto.randomUUID(),
+        name: trimmedName,
+        minutes,
+        done: false,
+      },
+      ...currentSessions,
+    ])
+    setSessionName('')
+    setMinutes(20)
+  }
 
-    return 'Taking it step by step'
-  }, [energy])
-
-  function handleToggleTask(taskId) {
-    setPracticeItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === taskId ? { ...item, done: !item.done } : item,
+  function handleToggleSession(sessionId) {
+    setSessions((currentSessions) =>
+      currentSessions.map((session) =>
+        session.id === sessionId
+          ? { ...session, done: !session.done }
+          : session,
       ),
     )
   }
 
-  function handleAddTask(event) {
-    event.preventDefault()
-
-    const trimmedTask = newTask.trim()
-    if (!trimmedTask) {
-      return
-    }
-
-    setPracticeItems((currentItems) => [
-      ...currentItems,
-      {
-        id: crypto.randomUUID(),
-        text: trimmedTask,
-        done: false,
-      },
-    ])
-    setNewTask('')
-  }
-
-  function handleAddWin(event) {
-    event.preventDefault()
-
-    const trimmedWin = winInput.trim()
-    if (!trimmedWin) {
-      return
-    }
-
-    setWins((currentWins) => [trimmedWin, ...currentWins])
-    setWinInput('')
-  }
-
   return (
-    <main className="page-shell">
-      <section className="hero-panel">
-        <div className="hero-copy">
-          <p className="eyebrow">Daily React Progress</p>
-          <h1>I practiced React a lot today.</h1>
-          <p className="hero-text">
-            This page shows the kind of work I focused on today: state updates,
-            controlled forms, lists, derived values, and interactive UI.
+    <main className="study-board">
+      <section className="hero-layout">
+        <article className="hero-main">
+          <p className="eyebrow">React Study Planner</p>
+          <h1>Another React practice project for today.</h1>
+          <p className="hero-copy">
+            This version is built like a study dashboard with forms, derived
+            statistics, toggles, and a cleaner multi-column layout.
           </p>
-        </div>
 
-        <div className="hero-card">
-          <p className="mini-label">Today&apos;s snapshot</p>
-          <h2>{name}&apos;s React journal</h2>
-          <div className="stats-row">
-            <div>
-              <span className="stat-value">{completionRate}%</span>
-              <span className="stat-label">practice complete</span>
-            </div>
-            <div>
-              <span className="stat-value">{streak} days</span>
-              <span className="stat-label">learning streak</span>
-            </div>
+          <div className="view-switcher" aria-label="Dashboard views">
+            {['Today', 'This Week', 'Next'].map((view) => (
+              <button
+                key={view}
+                type="button"
+                className={selectedView === view ? 'switch active' : 'switch'}
+                onClick={() => setSelectedView(view)}
+              >
+                {view}
+              </button>
+            ))}
           </div>
+        </article>
 
-          <label className="field-label" htmlFor="name">
-            Your name
+        <aside className="hero-side">
+          <p className="mini-label">Profile</p>
+          <label className="field-label" htmlFor="studentName">
+            Learner name
           </label>
           <input
-            id="name"
+            id="studentName"
             className="text-input"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Enter your name"
+            value={studentName}
+            onChange={(event) => setStudentName(event.target.value)}
           />
-        </div>
+
+          <label className="field-label" htmlFor="goal">
+            Current goal
+          </label>
+          <textarea
+            id="goal"
+            className="text-area"
+            value={goal}
+            onChange={(event) => setGoal(event.target.value)}
+            rows="4"
+          />
+        </aside>
       </section>
 
-      <section className="concept-grid">
-        {conceptCards.map((card) => (
-          <article key={card.title} className="concept-card">
-            <p className="mini-label">Practice area</p>
-            <h2>{card.title}</h2>
-            <p>{card.description}</p>
-          </article>
-        ))}
+      <section className="metrics-grid">
+        <article className="metric-card">
+          <p className="mini-label">Progress</p>
+          <h2>{progressPercent}% complete</h2>
+          <p>{completedSessions} sessions finished so far.</p>
+        </article>
+
+        <article className="metric-card">
+          <p className="mini-label">Time Spent</p>
+          <h2>{totalMinutes} mins</h2>
+          <p>Total planned time across your React practice sessions.</p>
+        </article>
+
+        <article className="metric-card">
+          <p className="mini-label">Best Focus Block</p>
+          <h2>{longestSession} mins</h2>
+          <p>Your longest deep-work session in this practice board.</p>
+        </article>
       </section>
 
-      <section className="dashboard-grid">
-        <article className="panel panel-tall">
+      <section className="content-grid">
+        <article className="panel">
           <div className="panel-header">
             <div>
-              <p className="mini-label">Checklist</p>
-              <h2>What I practiced today</h2>
+              <p className="mini-label">Session Planner</p>
+              <h2>{studentName}&apos;s React tasks</h2>
             </div>
-            <span className="badge">
-              {completedCount}/{practiceItems.length} done
-            </span>
+            <span className="badge">{selectedView}</span>
           </div>
 
-          <form className="inline-form" onSubmit={handleAddTask}>
+          <form className="planner-form" onSubmit={handleAddSession}>
             <input
               className="text-input"
-              value={newTask}
-              onChange={(event) => setNewTask(event.target.value)}
-              placeholder="Add another React practice task"
+              value={sessionName}
+              onChange={(event) => setSessionName(event.target.value)}
+              placeholder="Add a React study task"
             />
-            <button type="submit">Add</button>
+
+            <div className="form-row">
+              <label className="slider-wrap">
+                <span>Minutes: {minutes}</span>
+                <input
+                  className="range-input"
+                  type="range"
+                  min="10"
+                  max="90"
+                  step="5"
+                  value={minutes}
+                  onChange={(event) => setMinutes(Number(event.target.value))}
+                />
+              </label>
+              <button type="submit">Create session</button>
+            </div>
           </form>
 
-          <ul className="task-list">
-            {practiceItems.map((item) => (
-              <li key={item.id} className="task-item">
-                <label>
+          <ul className="session-list">
+            {sessions.map((session) => (
+              <li key={session.id} className="session-card">
+                <label className="session-check">
                   <input
                     type="checkbox"
-                    checked={item.done}
-                    onChange={() => handleToggleTask(item.id)}
+                    checked={session.done}
+                    onChange={() => handleToggleSession(session.id)}
                   />
-                  <span className={item.done ? 'task-text done' : 'task-text'}>
-                    {item.text}
-                  </span>
+                  <div>
+                    <strong>{session.name}</strong>
+                    <p>{session.minutes} minute focus block</p>
+                  </div>
                 </label>
               </li>
             ))}
@@ -196,62 +213,24 @@ function App() {
         <article className="panel accent-panel">
           <div className="panel-header">
             <div>
-              <p className="mini-label">Energy Meter</p>
-              <h2>How today felt</h2>
+              <p className="mini-label">Learning Tracks</p>
+              <h2>What this app practices</h2>
             </div>
-            <span className="badge">{moodLabel}</span>
+            <span className="badge soft-badge">React UI</span>
           </div>
 
-          <p className="panel-copy">
-            A small example of controlled range input with instant UI updates.
-          </p>
-
-          <div className="energy-number">{energy}/10</div>
-
-          <input
-            className="range-input"
-            type="range"
-            min="1"
-            max="10"
-            value={energy}
-            onChange={(event) => setEnergy(Number(event.target.value))}
-          />
-
-          <div className="button-row">
-            <button type="button" onClick={() => setStreak((value) => value + 1)}>
-              Increase streak
-            </button>
-            <button type="button" onClick={() => setStreak(1)}>
-              Reset streak
-            </button>
-          </div>
-        </article>
-
-        <article className="panel">
-          <div className="panel-header">
-            <div>
-              <p className="mini-label">Reflections</p>
-              <h2>My wins from today</h2>
-            </div>
-            <span className="badge">{wins.length} notes</span>
-          </div>
-
-          <form className="stack-form" onSubmit={handleAddWin}>
-            <input
-              className="text-input"
-              value={winInput}
-              onChange={(event) => setWinInput(event.target.value)}
-              placeholder="Write one thing you learned"
-            />
-            <button type="submit">Save note</button>
-          </form>
-
-          <div className="wins-list">
-            {wins.map((win) => (
-              <article key={win} className="win-card">
-                <p>{win}</p>
+          <div className="track-list">
+            {focusTracks.map((track) => (
+              <article key={track.title} className="track-card">
+                <h3>{track.title}</h3>
+                <p>{track.note}</p>
               </article>
             ))}
+          </div>
+
+          <div className="goal-card">
+            <p className="mini-label">Current note</p>
+            <p>{goal}</p>
           </div>
         </article>
       </section>
