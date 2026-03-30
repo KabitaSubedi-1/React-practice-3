@@ -1,49 +1,52 @@
-import { useState } from 'react'
-import './App.css'
+import { useMemo, useState } from 'react'
 
-const initialTasks = [
-  { id: 1, title: 'Draft landing page copy', category: 'Design', done: false },
-  { id: 2, title: 'Set up API integration notes', category: 'Backend', done: true },
-  { id: 3, title: 'Review onboarding flow', category: 'Product', done: false },
+const starterTopics = [
+  'Build a movie search with a public API',
+  'Add dark mode with a toggle and saved preference',
+  'Practice forms with validation and error messages',
+  'Create a small shopping cart with totals',
 ]
 
-const filters = ['All', 'Open', 'Done']
+const initialTasks = [
+  { id: 1, text: 'Review React components', done: true },
+  { id: 2, text: 'Practice useState', done: false },
+  { id: 3, text: 'Build one mini project this week', done: false },
+]
 
 function App() {
+  const [count, setCount] = useState(0)
+  const [name, setName] = useState('Kabita')
+  const [color, setColor] = useState('#ff7a59')
+  const [taskInput, setTaskInput] = useState('')
   const [tasks, setTasks] = useState(initialTasks)
-  const [title, setTitle] = useState('')
-  const [category, setCategory] = useState('General')
-  const [activeFilter, setActiveFilter] = useState('All')
 
-  const openCount = tasks.filter((task) => !task.done).length
-  const doneCount = tasks.length - openCount
+  const completedTasks = useMemo(
+    () => tasks.filter((task) => task.done).length,
+    [tasks],
+  )
 
-  const visibleTasks = tasks.filter((task) => {
-    if (activeFilter === 'Open') return !task.done
-    if (activeFilter === 'Done') return task.done
-    return true
-  })
+  const progressLabel = `${completedTasks}/${tasks.length || 0} tasks done`
 
-  function handleSubmit(event) {
+  function handleAddTask(event) {
     event.preventDefault()
 
-    const trimmedTitle = title.trim()
-    if (!trimmedTitle) return
+    const trimmedTask = taskInput.trim()
+    if (!trimmedTask) {
+      return
+    }
 
     setTasks((currentTasks) => [
+      ...currentTasks,
       {
         id: crypto.randomUUID(),
-        title: trimmedTitle,
-        category,
+        text: trimmedTask,
         done: false,
       },
-      ...currentTasks,
     ])
-    setTitle('')
-    setCategory('General')
+    setTaskInput('')
   }
 
-  function toggleTask(taskId) {
+  function handleToggleTask(taskId) {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
         task.id === taskId ? { ...task, done: !task.done } : task,
@@ -53,105 +56,145 @@ function App() {
 
   return (
     <main className="app-shell">
-      <section className="hero-panel">
-        <p className="eyebrow">React Project</p>
-        <h1>Focus Board</h1>
-        <p className="intro">
-          A lightweight task dashboard built with React. Add work, track progress,
-          and filter what matters right now.
-        </p>
+      <section className="hero">
+        <div>
+          <p className="eyebrow">React Practice Repo</p>
+          <h1>Learn React by building small pieces every day.</h1>
+          <p className="hero-copy">
+            This starter project gives you a few core patterns to practice:
+            state, events, lists, forms, derived values, and reusable UI.
+          </p>
+        </div>
 
-        <div className="stats-grid">
-          <article>
-            <span>Total Tasks</span>
-            <strong>{tasks.length}</strong>
-          </article>
-          <article>
-            <span>Open</span>
-            <strong>{openCount}</strong>
-          </article>
-          <article>
-            <span>Completed</span>
-            <strong>{doneCount}</strong>
-          </article>
+        <div className="hero-card">
+          <p className="card-label">Current focus</p>
+          <h2>{name}&apos;s React board</h2>
+          <p>{progressLabel}</p>
+
+          <label className="field-label" htmlFor="name">
+            Update your name
+          </label>
+          <input
+            id="name"
+            className="text-input"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Enter your name"
+          />
         </div>
       </section>
 
-      <section className="workspace-panel">
-        <form className="composer" onSubmit={handleSubmit}>
-          <div className="field-group">
-            <label htmlFor="task-title">Task title</label>
+      <section className="grid-layout">
+        <article className="panel">
+          <div className="panel-header">
+            <div>
+              <p className="card-label">useState practice</p>
+              <h2>Counter challenge</h2>
+            </div>
+            <span className="badge">Count: {count}</span>
+          </div>
+
+          <p className="panel-copy">
+            Try changing the button logic, add a reset rule, or prevent the
+            number from going below zero.
+          </p>
+
+          <div className="counter-value">{count}</div>
+
+          <div className="button-row">
+            <button type="button" onClick={() => setCount((value) => value - 1)}>
+              Decrease
+            </button>
+            <button type="button" onClick={() => setCount(0)}>
+              Reset
+            </button>
+            <button type="button" onClick={() => setCount((value) => value + 1)}>
+              Increase
+            </button>
+          </div>
+        </article>
+
+        <article className="panel">
+          <div className="panel-header">
+            <div>
+              <p className="card-label">Forms + lists</p>
+              <h2>Practice task tracker</h2>
+            </div>
+            <span className="badge">{progressLabel}</span>
+          </div>
+
+          <form className="task-form" onSubmit={handleAddTask}>
             <input
-              id="task-title"
-              type="text"
-              placeholder="Ship project summary"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              className="text-input"
+              value={taskInput}
+              onChange={(event) => setTaskInput(event.target.value)}
+              placeholder="Add a new practice task"
             />
-          </div>
+            <button type="submit">Add task</button>
+          </form>
 
-          <div className="field-group">
-            <label htmlFor="task-category">Category</label>
-            <select
-              id="task-category"
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-            >
-              <option>General</option>
-              <option>Design</option>
-              <option>Product</option>
-              <option>Backend</option>
-              <option>Frontend</option>
-            </select>
-          </div>
-
-          <button className="primary-button" type="submit">
-            Add task
-          </button>
-        </form>
-
-        <div className="toolbar">
-          <div className="filter-group" aria-label="Task filters">
-            {filters.map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                className={filter === activeFilter ? 'filter active' : 'filter'}
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter}
-              </button>
+          <ul className="task-list">
+            {tasks.map((task) => (
+              <li key={task.id} className="task-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={task.done}
+                    onChange={() => handleToggleTask(task.id)}
+                  />
+                  <span className={task.done ? 'task-text done' : 'task-text'}>
+                    {task.text}
+                  </span>
+                </label>
+              </li>
             ))}
+          </ul>
+        </article>
+
+        <article className="panel accent-panel">
+          <div className="panel-header">
+            <div>
+              <p className="card-label">Interactive styles</p>
+              <h2>Color picker</h2>
+            </div>
+            <span className="badge">Live preview</span>
           </div>
-          <p className="toolbar-note">{visibleTasks.length} items visible</p>
+
+          <p className="panel-copy">
+            Use this to practice controlled inputs and dynamic styling.
+          </p>
+
+          <div className="color-card" style={{ backgroundColor: color }}>
+            <p>Favorite UI color</p>
+            <strong>{color}</strong>
+          </div>
+
+          <label className="field-label" htmlFor="color">
+            Pick a color
+          </label>
+          <input
+            id="color"
+            className="color-input"
+            type="color"
+            value={color}
+            onChange={(event) => setColor(event.target.value)}
+          />
+        </article>
+      </section>
+
+      <section className="ideas-section">
+        <div className="section-heading">
+          <p className="eyebrow">Next steps</p>
+          <h2>Mini project ideas for practice</h2>
         </div>
 
-        <div className="task-list">
-          {visibleTasks.length === 0 ? (
-            <div className="empty-state">
-              <h2>No tasks here</h2>
-              <p>Switch filters or add a new task to keep the board moving.</p>
-            </div>
-          ) : (
-            visibleTasks.map((task) => (
-              <article
-                key={task.id}
-                className={task.done ? 'task-card done' : 'task-card'}
-              >
-                <div>
-                  <span className="task-category">{task.category}</span>
-                  <h2>{task.title}</h2>
-                </div>
-                <button
-                  type="button"
-                  className="toggle-button"
-                  onClick={() => toggleTask(task.id)}
-                >
-                  {task.done ? 'Mark open' : 'Mark done'}
-                </button>
-              </article>
-            ))
-          )}
+        <div className="ideas-grid">
+          {starterTopics.map((topic) => (
+            <article key={topic} className="idea-card">
+              <h3>{topic}</h3>
+              <p>Use this starter repo and build the feature in a new component.</p>
+            </article>
+          ))}
         </div>
       </section>
     </main>
